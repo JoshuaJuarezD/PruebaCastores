@@ -1,0 +1,157 @@
+﻿<h2>@Model.Titular</h2>
+<p>Por: @Model.UsuarioNombre @Model.FechaPublicacion</p>
+<p>@Model.Entrada</p>
+<p>@Model.Cuerpo</p>
+
+@if (!string.IsNullOrEmpty(Model.RutaImagen))
+{
+    <img src="@Model.RutaImagen" alt="@Model.PieImagen" />
+    <p>@Model.PieImagen</p>
+}
+@if (User.Identity.IsAuthenticated)
+{
+    <a id="btnComentar" class="btn btn-sm btn-primary">Comentar</a>
+    <div id="comentarioInput" style="display: none;">
+        <input id="txtComentario" type="text" class="form-control" placeholder="Escribe tu comentario..." />
+        <button id="btnEnviarComentario" class="btn btn-sm btn-success">Enviar</button>
+    </div>
+}
+<h3>Comentarios:</h3>
+@if (Model.Comentarios != null && Model.Comentarios.Count > 0)
+{
+    <ul>
+        @foreach (var comentario in Model.Comentarios)
+        {
+            if (@comentario.Id_personal > 0)
+            {
+                <p class="comment-user">@comentario.NombreUsuario - Personal</p>
+            }
+            else
+            {
+                <p class="comment-user">@comentario.NombreUsuario</p>
+            }
+            <div class="comment">
+                <p class="comment-text">@comentario.Text</p>
+                <p class="comment-date">@comentario.fecha_creacion</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="btn btn-sm btn-primary" onclick="mostrarRespuesta(@comentario.Id)">Responder</a>
+                    <div id="respuesta-@comentario.Id" style="display: none;">
+                        <input id="txtRespuesta-@comentario.Id" type="text" class="form-control" placeholder="Escribe tu respuesta..." />
+                        <button class="btn btn-sm btn-success btn-enviar-respuesta" data-id="@comentario.Id" data-noticiaId="@Model.Id">Enviar</button>
+                    </div>
+                }
+            </div>
+            @if (comentario.Respuestas != null && comentario.Respuestas.Count > 0)
+            {
+                @foreach (var resp in comentario.Respuestas)
+                {
+                    if (@resp.Id_personal > 0)
+                    {
+                        <p class="comment-user">@resp.NombreUsuario - Personal</p>
+                    }
+                    else
+                    {
+                        <p class="comment-user">@resp.NombreUsuario</p>
+                    }
+                    <div class="comment comment-response">
+                        <p class="comment-text">@resp.Text</p>
+                        <p class="comment-date">@resp.fecha_creacion</p>
+                    </div>
+                }
+            }
+        }
+    </ul>
+}
+else
+{
+    <p>No hay comentarios.</p>
+}
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Volver a la lista</a>
+<style>
+    .comment {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .comment-user {
+        font-weight: bold;
+    }
+
+    .comment-text {
+        margin: 5px 0;
+    }
+
+    .comment-date {
+        font-style: italic;
+        color: #888;
+    }
+
+    .comment-response {
+        margin-left: 30px;
+        border-color: #ddd;
+        background-color: #f2f2f2;
+    }
+</style>
+
+<script>
+    document.getElementById('btnComentar').addEventListener('click', function () {
+        document.getElementById('comentarioInput').style.display = 'block';
+    });
+
+    document.getElementById('btnEnviarComentario').addEventListener('click', function () {
+        var comentario = document.getElementById('txtComentario').value;
+        var noticiaId = @Model.Id;
+
+        fetch(`/Home/Comentar?noticiaId=${noticiaId}&comentario=${comentario}`, {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    });
+</script>
+<script>
+    function mostrarRespuesta(comentarioId, noticiaId) {
+        var respuestaDiv = document.getElementById('respuesta-' + comentarioId);
+        respuestaDiv.style.display = 'block';
+
+        var enviarRespuestaButton = document.getElementById('btn-enviar-respuesta-' + comentarioId);
+        enviarRespuestaButton.setAttribute('data-noticiaId', noticiaId);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var responderButtons = document.querySelectorAll(".btn-responder");
+
+        responderButtons.forEach(function (btn) {
+            btn.addEventListener("click", function (event) {
+                var comentarioId = this.getAttribute("data-id");
+                var noticiaId = @Model.Id; // Obtén el id_noticia de tu modelo
+                mostrarRespuesta(comentarioId, noticiaId);
+            });
+        });
+
+        var enviarRespuestaButtons = document.querySelectorAll(".btn-enviar-respuesta");
+
+        enviarRespuestaButtons.forEach(function (btn) {
+            btn.addEventListener("click", function (event) {
+                var respuestaInput = this.previousElementSibling;
+                var comentarioId = this.getAttribute("data-id");
+                var noticiaId = this.getAttribute("data-noticiaId"); // Obtén el id_noticia de los atributos del botón
+                var respuesta = respuestaInput.value;
+                fetch(`/Home/ResponderComentario?comentarioId=${comentarioId}&respuesta=${respuesta}&noticiaId=${noticiaId}`, {
+                    method: "POST"
+                }).then(function (response) {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    });
+</script>
+

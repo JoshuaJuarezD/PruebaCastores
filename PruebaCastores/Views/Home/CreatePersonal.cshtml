@@ -1,0 +1,49 @@
+﻿@model PruebaCastores.Models.Personal
+
+@{
+    ViewData["Title"] = "View";
+}
+
+<h1>View</h1>
+
+<h4>Noticia</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreatePersonal">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="apepaterno" class="control-label">Apellido Paterno</label>
+                <input asp-for="apepaterno" class="form-control" />
+                <span asp-validation-for="apepaterno" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="apematerno" class="control-label">Apellido Materno</label>
+                <input asp-for="apematerno" class="form-control" />
+                <span asp-validation-for="apematerno" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="nombre" class="control-label">Nombre</label>
+                <input asp-for="nombre" class="form-control" />
+                <span asp-validation-for="nombre" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="direccion" class="control-label">Direccion</label>
+                <input asp-for="direccion" class="form-control" />
+                <span asp-validation-for="direccion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

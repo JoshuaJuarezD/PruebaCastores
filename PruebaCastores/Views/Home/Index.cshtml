@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model List<Noticia>
+
+<h2>Noticias</h2>
+@if (User.Identity.IsAuthenticated && ViewBag.TieneIdPersonal>0)
+{
+    <a asp-controller="Home" asp-action="Create" class="btn btn-secondary">Crear Noticia</a>
+}else{
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a asp-controller="Home" asp-action="CreatePersonal" class="btn btn-secondary">Hacerse Personal</a>
+    }
+}
+@foreach (var noticia in Model)
+{
+        <div>
+            <h3>@noticia.Titular</h3>
+            <p>Por: @noticia.UsuarioNombre @noticia.FechaPublicacion</p>
+            <p>@noticia.Entrada</p>
+        @if (!string.IsNullOrEmpty(noticia.RutaImagen))
+        {
+              <img src="@noticia.RutaImagen" alt="@noticia.PieImagen" />
+        }
+        </div>
+        <a asp-controller="Home" asp-action="Show" asp-route-id="@noticia.Id" class="btn btn-primary">Ver Noticia</a>
+}
